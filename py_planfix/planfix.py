@@ -3,7 +3,10 @@ __author__ = u'zloiia'
 
 import requests
 from requests.auth import HTTPBasicAuth
-import xml.etree.cElementTree as ET
+import hashlib
+import dict2xml
+import xmltodict
+
 
 PLANFIX_URL = "https://api.planfix.ru/xml/"
 
@@ -24,36 +27,43 @@ class Planfix(object):
         self.__ACCOUNT__ = account
         self.__SIGN_KEY__ = sign_key
 
-    @staticmethod
-    def __create_root__(method):
-        """Создает корневой элемент
-        :param method:
-        :return:
-        """
-        assert (method is not None)
-        root = ET.Element("request", method=method)
-        return root
 
     @staticmethod
     def __fieldsignature__(root):
-        """Склеивает поля документа для расчета сигнатуры
-        :param root: корневой элемент
+        """Склеивает поля запроса для расчета сигнатуры
+        :param root: запрос
         :return:
         """
         result = ''
-
-        for node in sorted(list(root), key=lambda x: x.tag):
-            result+= node.text
-            for child in sorted(list(node), key=lambda x: x.tag):
-                result += Planfix.__signature__(child)
+        if isinstance(root, dict):
+            for k in sorted(root):
+                #result += str(root[k])
+                result += Planfix.__fieldsignature__(root[k])
+        elif isinstance(root, list):
+            result += ''.join([str(i) for i in sorted(root)])
+        else:
+            result += str(root)
         return result
 
-    def _signature_(self, root):
-        """Рассчитываем сигнатуру элемента запроса
-        :param root:
+
+    @staticmethod
+    def __checkResponce__(r):
+        if r['response']['@status']!= "ok":
+            pass
+        return r['response']
+
+    def _signature_(self, function, query):
+        """Расчет подписи для запроса
+        :param function:
+        :param query:
         :return:
         """
-        assert ()
+        assert (function is not None)
+        assert (query is not None)
+        assert (self.__SIGN_KEY__ is not None)
+        md5_hash = hashlib.md5()
+        md5_hash.update(function + Planfix.__fieldsignature__(query) + self.__SIGN_KEY__)
+        return md5_hash.hexdigest()
 
     def auth(self, login, password):
         """Авторизация на сервисе
@@ -64,20 +74,31 @@ class Planfix(object):
         assert (self.__ACCOUNT__ is not None)
         assert (login is not None)
         assert (password is not None)
-        root = self.__create_root__("auth.login")
-        ET.SubElement(root, "account").text = self.__ACCOUNT__
-        ET.SubElement(root, "login").text = login
-        ET.SubElement(root, "password").text = password
+        method = "auth.login"
+        request = {
+            "account": self.__ACCOUNT__,
+            "login": login,
+            "password": password,
+        }
+        r = self.__send_request__(method, request)
+        self.__SID__ = r["sid"]
 
 
-    def __get_request__(self, function, data = None):
+    def __send_request__(self, method, request):
         header = {
             'Content-Type': 'application/xml'
         }
-        content = ET.Element("request")
-        return requests.post(
+        request["signature"] = self._signature_(method, request)
+        request = {
+            "request": request
+        }
+        data = dict2xml.dict2xml(request, method).doc.toxml("utf-8")
+
+        r = requests.post(
             PLANFIX_URL,
             auth=HTTPBasicAuth(self.__API_KEY__,""),
             headers = header,
             data=data
         )
+        r.raise_for_status()
+        return Planfix.__checkResponce__(xmltodict.parse(r.text))
