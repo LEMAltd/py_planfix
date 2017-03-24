@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 import hashlib
 import dict2xml
 import xmltodict
-
+import schemas
 
 PLANFIX_URL = "https://api.planfix.ru/xml/"
 
@@ -83,15 +83,18 @@ class Planfix(object):
         r = self.__send_request__(method, request)
         self.__SID__ = r["sid"]
 
-
     def __send_request__(self, method, request):
         header = {
             'Content-Type': 'application/xml'
         }
         request["signature"] = self._signature_(method, request)
+        if self.__SID__ is not None:
+            request['sid'] = self.__SID__
+            request['account'] = self.__ACCOUNT__
         request = {
             "request": request
         }
+
         data = dict2xml.dict2xml(request, method).doc.toxml("utf-8")
 
         r = requests.post(
@@ -102,3 +105,16 @@ class Planfix(object):
         )
         r.raise_for_status()
         return Planfix.__checkResponce__(xmltodict.parse(r.text))
+
+    def contacts_add(self, contact):
+        """Добавление контакта
+        :param contact:
+        :return:
+        """
+        assert (isinstance(contact, dict))
+        assert (self.__SID__ is not None)
+        method = "contact.add"
+        contact = {
+            "contact": contact
+        }
+        return self.__send_request__(method, contact)

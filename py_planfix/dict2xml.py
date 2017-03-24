@@ -7,6 +7,7 @@ class dict2xml(object):
     doc = Document()
 
     def __init__(self, structure ,method):
+        doc = Document()
         if len(structure) == 1:
             rootName = str(structure.keys()[0])
             self.root = self.doc.createElement(rootName)
