@@ -118,3 +118,85 @@ class Planfix(object):
             "contact": contact
         }
         return self.__send_request__(method, contact)
+
+    def contact_update(self, contact):
+        """Обновление контакта
+        :param contact: словарь с данными контакта
+        :return: 
+        """
+        assert (contact is not None)
+        assert (isinstance(contact, dict))
+        assert "id" in contact.keys() or "general" in contact.keys(), (u'"Id" or "general" must be set')
+        method = "contact.update"
+        contact = {
+            "contact": contact
+        }
+        return self.__send_request__(method, contact)
+
+    def contact_get(self, contact):
+        """Получение данных о контакте
+        :param contact: словарь с данными контакта
+        :return: 
+        """
+        assert (contact is not None)
+        assert (isinstance(contact, dict))
+        assert "id" in contact.keys() or "general" in contact.keys(), (u'"Id" or "general" must be set')
+        method = "contact.get"
+        contact = {
+            "contact": contact
+        }
+        return self.__send_request__(method, contact)
+
+    def contact_getlist(self, request):
+        """Получение спистка контактов
+        :param request: 
+        :return: 
+        """
+        assert (request is not None)
+        assert (isinstance(request, dict))
+        assert "target" in request.keys() or "search" in request.keys(), (u'"target" or "search" must be set')
+        method = "contact.getList"
+        return self.__send_request__(method, request)
+
+    def contact_manageplanfixaccess(self, request):
+        """Функция позволяет разрешить или запретить доступ для контакта. Выполнение этой функции требует наличие админ прав.
+        :param request: 
+        :return: 
+        """
+        assert (request is not None)
+        assert (isinstance(request, dict))
+        assert "id" in request.keys() and "havePlanfixAccess" in request.keys(), (u'"id" and "havePlanfixAccess" must be setted')
+        method = "contact.managePlanfixAccess"
+        request = {
+            "contact": request
+        }
+        return self.__send_request__(method, request)
+
+    def contact_updateContractors(self, request):
+        """Функция изменение информации о принадлежности контакта к фирме/контрагенту
+        :param request: 
+        :return: 
+        """
+        method="contact.updateContractors"
+        assert (request is not None)
+        assert (isinstance(request, dict))
+        method="contact.updateContractors"
+        request = {
+            "contact": request
+        }
+        return self.__send_request__(method, request)
+
+    def contact_delete(self, request):
+        """Функция позволяет удалить контакт. Выполнение этой функции требует наличие соответствующих прав
+        :param request: 
+        :return: 
+        """
+        assert (request is not None)
+        assert (isinstance(request, dict))
+        assert "id" in request.keys(), (u'"id" must be setted')
+        method = "contact.delete"
+        request = {
+            "contact": request
+        }
+        return self.__send_request__(method, request)
+
