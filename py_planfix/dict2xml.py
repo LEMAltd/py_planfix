@@ -4,10 +4,10 @@ from xml.dom.minidom import Document
 
 
 class dict2xml(object):
-    doc = Document()
+    doc = None
 
     def __init__(self, structure ,method):
-        doc = Document()
+        self.doc = Document()
         if len(structure) == 1:
             rootName = str(structure.keys()[0])
             self.root = self.doc.createElement(rootName)

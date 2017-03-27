@@ -87,10 +87,10 @@ class Planfix(object):
         header = {
             'Content-Type': 'application/xml'
         }
-        request["signature"] = self._signature_(method, request)
         if self.__SID__ is not None:
             request['sid'] = self.__SID__
             request['account'] = self.__ACCOUNT__
+        request["signature"] = self._signature_(method, request)
         request = {
             "request": request
         }
