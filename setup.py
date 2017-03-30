@@ -4,9 +4,14 @@ setup(
     name='py_planfix',
     version='0.0.1',
     packages=['py_planfix'],
-    url='',
-    license='',
+    url='https://github.com/zloiia/py_planfix',
+    license='MIT',
     author='zloiia',
     author_email='zloiiaarhpgu@gmail.com',
-    description=''
+    description='',
+    install_requires= [
+        'requests',
+        'schema',
+        'dicttoxml'
+    ],
 )
